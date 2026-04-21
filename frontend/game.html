@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NumPattern — Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="game-page">
+  <div class="game-bg">
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- HUD -->
+  <header class="game-hud">
+    <div class="hud-left">
+      <button id="exitBtn" class="btn-ghost-sm">← Exit</button>
+    </div>
+    <div class="hud-center">
+      <div class="timer-wrap">
+        <svg class="timer-ring" viewBox="0 0 60 60">
+          <circle class="ring-bg" cx="30" cy="30" r="26"/>
+          <circle class="ring-progress" id="timerRing" cx="30" cy="30" r="26"/>
+        </svg>
+        <span class="timer-val" id="timerDisplay">60</span>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-stat">
+        <span class="hs-val" id="scoreDisplay">0</span>
+        <span class="hs-lbl">SCORE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- LIVES -->
+  <div class="lives-bar">
+    <span class="live-heart active" id="life1">♥</span>
+    <span class="live-heart active" id="life2">♥</span>
+    <span class="live-heart active" id="life3">♥</span>
+    <span class="diff-badge" id="diffBadge">EASY</span>
+  </div>
+
+  <!-- GAME AREA -->
+  <main class="game-area">
+    <div class="pattern-display" id="patternDisplay">
+      <div class="pattern-loading" id="patternLoading">
+        <span class="loading-dots">Generating pattern</span>
+      </div>
+      <div class="pattern-content hidden" id="patternContent">
+        <div class="pattern-type-badge" id="patternTypeBadge">Arithmetic</div>
+        <div class="sequence-row" id="sequenceRow"></div>
+        <div class="question-mark">?</div>
+      </div>
+    </div>
+
+    <div class="answer-panel" id="answerPanel">
+      <div class="answer-hint" id="answerHint">What comes next?</div>
+      <div class="answer-input-wrap">
+        <input
+          type="number"
+          id="answerInput"
+          class="answer-input"
+          placeholder="Enter number…"
+          autocomplete="off"
+        />
+        <button id="submitBtn" class="btn-submit">
+          <span>SUBMIT</span>
+        </button>
+      </div>
+      <div class="answer-feedback hidden" id="answerFeedback"></div>
+    </div>
+
+    <div class="streak-display">
+      <span id="streakText"></span>
+    </div>
+  </main>
+
+  <!-- GAME OVER MODAL -->
+  <div class="modal-overlay hidden" id="gameOverModal">
+    <div class="modal-card">
+      <div class="modal-icon" id="modalIcon">💀</div>
+      <h2 class="modal-title" id="modalTitle">GAME OVER</h2>
+      <div class="modal-score">
+        <span class="ms-label">FINAL SCORE</span>
+        <span class="ms-value" id="modalScore">0</span>
+      </div>
+      <div class="modal-difficulty" id="modalDifficulty"></div>
+      <div class="modal-actions">
+        <button id="playAgainBtn" class="btn-primary">Play Again</button>
+        <button id="menuBtn" class="btn-ghost">Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>

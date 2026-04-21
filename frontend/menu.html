@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NumPattern — Menu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="menu-page">
+  <div class="menu-bg">
+    <div class="grid-overlay"></div>
+  </div>
+
+  <header class="app-header">
+    <div class="brand-small">N<span>P</span></div>
+    <nav class="header-nav">
+      <span class="user-greeting">Hello, <strong id="userName">Player</strong></span>
+      <button id="logoutBtn" class="btn-ghost">Logout</button>
+    </nav>
+  </header>
+
+  <main class="menu-main">
+    <!-- HERO -->
+    <section class="menu-hero">
+      <div class="hero-label">NUMPATTERN v1.0</div>
+      <h2 class="hero-title">Pattern<br><em>Master</em></h2>
+      <p class="hero-sub">Identify arithmetic, geometric, and incremental sequences under pressure. Earn glory. Beat the board.</p>
+    </section>
+
+    <!-- STATS CARD -->
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat-item">
+        <span class="stat-val" id="statBest">—</span>
+        <span class="stat-lbl">Best Score</span>
+      </div>
+      <div class="stat-sep">|</div>
+      <div class="stat-item">
+        <span class="stat-val" id="statGames">—</span>
+        <span class="stat-lbl">Games Played</span>
+      </div>
+      <div class="stat-sep">|</div>
+      <div class="stat-item">
+        <span class="stat-val" id="statRank">—</span>
+        <span class="stat-lbl">Global Rank</span>
+      </div>
+    </div>
+
+    <!-- DIFFICULTY SELECT -->
+    <div class="difficulty-panel">
+      <p class="panel-label">SELECT DIFFICULTY</p>
+      <div class="diff-options">
+        <button class="diff-btn active" data-diff="easy">
+          <span class="diff-icon">○</span>
+          <span class="diff-name">Easy</span>
+          <span class="diff-desc">Simple patterns · Small numbers</span>
+        </button>
+        <button class="diff-btn" data-diff="medium">
+          <span class="diff-icon">◈</span>
+          <span class="diff-name">Medium</span>
+          <span class="diff-desc">Combined patterns · Moderate</span>
+        </button>
+        <button class="diff-btn" data-diff="hard">
+          <span class="diff-icon">◆</span>
+          <span class="diff-name">Hard</span>
+          <span class="diff-desc">Large numbers · Mixed patterns</span>
+        </button>
+      </div>
+    </div>
+
+    <button id="startGameBtn" class="btn-giant">
+      START GAME
+      <span class="btn-arrow">→</span>
+    </button>
+
+    <!-- LEADERBOARD PREVIEW -->
+    <div class="leaderboard-card">
+      <div class="lb-header">
+        <span>🏆 LEADERBOARD</span>
+        <div class="lb-filter">
+          <button class="lb-tab active" data-diff="all">All</button>
+          <button class="lb-tab" data-diff="easy">Easy</button>
+          <button class="lb-tab" data-diff="medium">Medium</button>
+          <button class="lb-tab" data-diff="hard">Hard</button>
+        </div>
+      </div>
+      <div class="lb-body" id="leaderboard">
+        <div class="lb-loading">Loading ranks…</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="js/menu.js"></script>
+</body>
+</html>
