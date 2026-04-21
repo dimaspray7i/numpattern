@@ -97,20 +97,32 @@ registerForm?.addEventListener('submit', async (e) => {
   const password = passEl.value;
   const password_confirmation = confirmEl.value;
 
+  // DEBUG: Lihat data yang akan dikirim
+  console.log('Register data:', { name, email, password, password_confirmation });
+
   let valid = true;
   if (!name) { showError($('#regNameErr'), 'Name is required'); valid = false; }
   if (!email) { showError($('#regEmailErr'), 'Email is required'); valid = false; }
   if (!password || password.length < 6) { showError($('#regPasswordErr'), 'Min 6 characters'); valid = false; }
-  if (password !== password_confirmation) { showError($('#regConfirmErr'), 'Passwords do not match'); valid = false; }
+  if (password !== password_confirmation) { 
+    console.log('Password mismatch:', password, password_confirmation);
+    showError($('#regConfirmErr'), 'Passwords do not match'); 
+    valid = false; 
+  }
   if (!valid) return;
 
   setLoading(btn, true);
 
   try {
-    const { user, token } = await register(name, email, password, password_confirmation);
-    saveSession(token, user);
+    // PASTIKAN URUTAN PARAMETER SESUAI DENGAN API
+    // register(name, email, password, password_confirmation)
+    const response = await register(name, email, password, password_confirmation);
+    console.log('Register success:', response);
+    
+    saveSession(response.token, response.user);
     window.location.href = '/menu.html';
   } catch (err) {
+    console.error('Register error:', err);
     const errs = err.errors || {};
     if (errs.name) showError($('#regNameErr'), errs.name[0]);
     if (errs.email) showError($('#regEmailErr'), errs.email[0]);

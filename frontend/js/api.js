@@ -8,7 +8,7 @@ const BASE_URL = 'http://localhost:8000/api'; // Change to your backend URL
  * Throws on non-2xx (or handles 401 by redirecting to login).
  */
 async function request(method, endpoint, body = null) {
-  const token = localStorage.getItem('np_token');
+  const token = localStorage.getItem('np_token');  // ← PASTIKAN: token key ini sama dengan di auth.js
 
   const headers = {
     'Content-Type': 'application/json',
@@ -22,27 +22,33 @@ async function request(method, endpoint, body = null) {
   const options = { method, headers };
   if (body) options.body = JSON.stringify(body);
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, options);
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, options);
 
-  // Token expired / invalid — force logout
-  if (response.status === 401) {
-    localStorage.removeItem('np_token');
-    localStorage.removeItem('np_user');
-    window.location.href = '/index.html';
-    throw new Error('Unauthenticated');
+    // Token expired / invalid — force logout
+    if (response.status === 401) {
+      localStorage.removeItem('np_token');
+      localStorage.removeItem('np_user');
+      window.location.href = '/index.html';
+      throw new Error('Unauthenticated');
+    }
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Pass validation errors through
+      const err = new Error(data.message || 'Request failed');
+      err.status = response.status;
+      err.errors = data.errors || {};
+      throw err;
+    }
+
+    return data;
+  } catch (error) {
+    // Handle network errors (server down, CORS, etc)
+    console.error('Network/API Error:', error);
+    throw error;
   }
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    // Pass validation errors through
-    const err = new Error(data.message || 'Request failed');
-    err.status = response.status;
-    err.errors = data.errors || {};
-    throw err;
-  }
-
-  return data;
 }
 
 // ─── AUTH ────────────────────────────────────
@@ -65,8 +71,8 @@ export const submitAnswer = (answer) =>
 export const getScore = () =>
   request('GET', '/get-score');
 
-export const startSession = (difficulty) =>
-  request('POST', '/start-session', { difficulty });
+export const startSession = (difficulty = null) =>
+  request('POST', '/start-session', difficulty ? { difficulty } : {});
 
 export const endGame = () =>
   request('POST', '/end-game');

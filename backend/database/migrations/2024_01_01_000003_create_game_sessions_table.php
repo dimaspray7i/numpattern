@@ -1,5 +1,4 @@
 <?php
-// database/migrations/2024_01_01_000002_create_personal_access_tokens_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,20 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
+        Schema::create('game_sessions', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->integer('current_score')->default(0);
+            $table->integer('lives')->default(3);
+            $table->integer('correct_streak')->default(0);
+            $table->integer('wrong_streak')->default(0);
+            $table->enum('difficulty', ['easy', 'medium', 'hard'])->default('easy');
+            $table->integer('current_answer')->nullable();
             $table->timestamps();
+            
+            $table->unique('user_id');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('personal_access_tokens');
+        Schema::dropIfExists('game_sessions');
     }
 };

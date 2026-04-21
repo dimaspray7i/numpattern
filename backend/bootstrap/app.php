@@ -1,10 +1,9 @@
 <?php
-// bootstrap/app.php
-// Laravel 12 application bootstrap
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,40 +13,47 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Sanctum stateful middleware for cookie-auth (optional, token auth doesn't need this)
+        // Trust hosts
+        $middleware->trustHosts(at: ['localhost']);
+        
+        // Sanctum stateful API
         $middleware->statefulApi();
-
-        // Throttle API requests globally
-        $middleware->throttleApi();
+        
+        // CSRF Exception - biarkan API dan dashboard lewat
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            'login',
+            'register',
+            'dashboard',
+            'dashboard/*',
+            'sanctum/csrf-cookie',
+        ]);
+        
+        // Alias middleware (jika diperlukan)
+        $middleware->alias([
+            'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+            'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Return JSON for all API exceptions
-        $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+        $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
         });
 
-        $exceptions->renderable(function (\Illuminate\Validation\ValidationException $e, $request) {
+        $exceptions->renderable(function (\Illuminate\Validation\ValidationException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
                     'message' => 'Validation failed.',
-                    'errors'  => $e->errors(),
+                    'errors' => $e->errors(),
                 ], 422);
             }
         });
-
-        $exceptions->renderable(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, $request) {
+        
+        $exceptions->renderable(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Resource not found.'], 404);
-            }
-        });
-
-        $exceptions->renderable(function (\Throwable $e, $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
-                $status  = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
-                $message = app()->environment('production') ? 'Server error.' : $e->getMessage();
-                return response()->json(['message' => $message], $status);
             }
         });
     })->create();

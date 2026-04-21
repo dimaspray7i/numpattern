@@ -2,29 +2,8 @@
 
 namespace App\Services;
 
-/**
- * PatternService
- *
- * Generates number sequences for the game.
- * Answer is computed server-side and returned with the sequence,
- * but only the sequence is sent to the client.
- *
- * Pattern types:
- *   - arithmetic   : a, a+d, a+2d, ...
- *   - geometric    : a, a*r, a*r², ...
- *   - incremental  : differences themselves increase: +2, +4, +6, ...
- *   - mixed        : combination (hard only)
- */
 class PatternService
 {
-    // ─── PUBLIC ──────────────────────────────────
-
-    /**
-     * Generate a question array with sequence, correct answer, and type.
-     *
-     * @param  string  $difficulty  easy|medium|hard
-     * @return array{ sequence: int[], answer: int, type: string }
-     */
     public function generate(string $difficulty): array
     {
         $generators = match ($difficulty) {
@@ -45,11 +24,6 @@ class PatternService
         };
     }
 
-    /**
-     * Adjust difficulty based on streaks.
-     * correct_streak >= 3 → upgrade
-     * wrong_streak   >= 2 → downgrade
-     */
     public function adjustDifficulty(string $current, int $correctStreak, int $wrongStreak): string
     {
         $levels = ['easy', 'medium', 'hard'];
@@ -66,8 +40,6 @@ class PatternService
         return $current;
     }
 
-    // ─── GENERATORS ──────────────────────────────
-
     private function arithmetic(string $difficulty): array
     {
         [$minStart, $maxStart, $minDiff, $maxDiff] = match ($difficulty) {
@@ -80,7 +52,6 @@ class PatternService
         $start = rand($minStart, $maxStart);
         $d     = rand($minDiff, $maxDiff) * (rand(0, 1) ? 1 : -1);
 
-        // Ensure sequence stays positive
         if ($start + $d * 4 < 0) $d = abs($d);
 
         $length   = rand(4, 6);
@@ -126,7 +97,6 @@ class PatternService
             default  => [1,  10, 1],
         };
 
-        // Differences: step, step*2, step*3, ...
         $start    = rand($minStart, $maxStart);
         $length   = rand(4, 6);
         $sequence = [$start];
@@ -144,13 +114,11 @@ class PatternService
 
     private function mixed(): array
     {
-        // Odd-position: arithmetic, even-position: different arithmetic (two interleaved)
         $a1 = rand(10, 50);
         $d1 = rand(5, 20);
         $a2 = rand(10, 50);
         $d2 = rand(5, 20);
 
-        // 6-element interleaved, question mark on 7th
         $sequence = [
             $a1,
             $a2,
@@ -160,7 +128,6 @@ class PatternService
             $a2 + 2 * $d2,
         ];
 
-        // Answer: next in first series (odd index)
         $answer = $a1 + 3 * $d1;
 
         return ['sequence' => $sequence, 'answer' => $answer, 'type' => 'mixed'];
