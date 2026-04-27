@@ -1,6 +1,3 @@
-// js/game.js
-// Game page controller — orchestrates timer, API, UI
-
 import { generateQuestion, submitAnswer, endGame, startSession } from './api.js';
 import { requireAuth } from './auth.js';
 import { $, $$, buildSequenceRow, animateScore, showFeedback, hideFeedback, setStreakText, updateLives } from './ui.js';
@@ -40,7 +37,7 @@ async function init() {
   const difficulty = sessionStorage.getItem('np_difficulty') || 'easy';
   setState({ difficulty });
 
-  diffBadge.textContent = difficulty.toUpperCase();
+  diffBadge.textContent = difficulty.toUpperCase() === 'EASY' ? 'MUDAH' : difficulty.toUpperCase() === 'MEDIUM' ? 'SEDANG' : 'SULIT';
   diffBadge.className = `diff-badge ${difficulty}`;
 
   resetGameState();
@@ -107,23 +104,51 @@ async function loadQuestion() {
     renderQuestion(data);
   } catch (err) {
     console.error('Failed to load question', err);
-    patternLoading.querySelector('.loading-dots').textContent = 'Error loading question…';
+    patternLoading.querySelector('.loading-dots').textContent = 'Gagal memuat soal…';
   }
 }
 
+// ── Render sequence WITH answer placeholder box ─────────────
 function renderQuestion({ sequence, pattern_type }) {
   patternLoading.classList.add('hidden');
   patternContent.classList.remove('hidden');
 
   const typeLabels = {
-    arithmetic: 'Arithmetic Sequence',
-    geometric: 'Geometric Sequence',
-    incremental: 'Incremental Pattern',
-    mixed: 'Mixed Pattern',
+    arithmetic: 'Pola Aritmatika',
+    geometric: 'Pola Geometri',
+    incremental: 'Pola Bertingkat',
+    mixed: 'Pola Campuran',
   };
   patternTypeBadge.textContent = typeLabels[pattern_type] || pattern_type;
 
-  buildSequenceRow(sequenceRow, sequence);
+  // Clear sequence row
+  sequenceRow.innerHTML = '';
+
+  // Render each number in sequence
+  sequence.forEach((num, index) => {
+    const numEl = document.createElement('div');
+    numEl.className = 'seq-num';
+    numEl.textContent = num;
+    numEl.style.animationDelay = `${index * 0.1}s`;
+    sequenceRow.appendChild(numEl);
+
+    // Add comma separator (except after last number)
+    if (index < sequence.length - 1) {
+      const sep = document.createElement('span');
+      sep.className = 'seq-sep';
+      sep.textContent = ',';
+      sequenceRow.appendChild(sep);
+    }
+  });
+
+  // ➕ TAMBAHKAN KOTAK JAWABAN DENGAN TITIK-TITIK
+  const answerBox = document.createElement('div');
+  answerBox.className = 'seq-answer-box';
+  answerBox.id = 'answerPlaceholder';
+  answerBox.setAttribute('aria-label', 'Kotak jawaban yang harus ditebak');
+  answerBox.innerHTML = '<span>...</span>';
+  sequenceRow.appendChild(answerBox);
+
   submitBtn.disabled = false;
   answerInput.focus();
 }
@@ -171,13 +196,23 @@ async function handleSubmit() {
     setStreakText(streakText, correct_streak, wrong_streak);
 
     // Diff badge (may have changed due to difficulty engine)
-    diffBadge.textContent = difficulty.toUpperCase();
+    diffBadge.textContent = difficulty.toUpperCase() === 'EASY' ? 'MUDAH' : difficulty.toUpperCase() === 'MEDIUM' ? 'SEDANG' : 'SULIT';
     diffBadge.className = `diff-badge ${difficulty}`;
 
     // Pattern display visual feedback
     const patternDisplay = $('#patternDisplay');
     patternDisplay.classList.remove('correct', 'wrong');
     patternDisplay.classList.add(correct ? 'correct' : 'wrong');
+
+    // Update answer box visual
+    const answerBox = document.getElementById('answerPlaceholder');
+    if (answerBox) {
+      answerBox.classList.remove('correct', 'wrong');
+      answerBox.classList.add(correct ? 'correct' : 'wrong');
+      if (correct) {
+        answerBox.innerHTML = `<span>${correct_answer}</span>`;
+      }
+    }
 
     if (game_over || lives <= 0) {
       clearInterval(timerInterval);
@@ -220,9 +255,10 @@ async function triggerGameOver(reason, finalScore = null) {
 
   // Show modal
   modalScore.textContent = displayScore;
-  modalDifficulty.textContent = `${difficulty.toUpperCase()} MODE · ${reason === 'time' ? 'TIME UP' : 'NO LIVES LEFT'}`;
+  const diffLabel = difficulty.toUpperCase() === 'EASY' ? 'MUDAH' : difficulty.toUpperCase() === 'MEDIUM' ? 'SEDANG' : 'SULIT';
+  modalDifficulty.textContent = `${diffLabel} · ${reason === 'time' ? 'WAKTU HABIS' : 'NYAWA HABIS'}`;
   modalIcon.textContent = reason === 'time' ? '⏰' : '💀';
-  modalTitle.textContent = reason === 'time' ? 'TIME\'S UP' : 'GAME OVER';
+  modalTitle.textContent = reason === 'time' ? 'WAKTU HABIS' : 'GAME OVER';
   gameOverModal.classList.remove('hidden');
 }
 
