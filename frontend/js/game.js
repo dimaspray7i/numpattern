@@ -156,7 +156,10 @@ function renderQuestion({ sequence, pattern_type }) {
 // ── Submit answer ─────────────────────────────
 async function handleSubmit() {
   if (submitLocked) return;
+  
+  // Simpan jawaban user ke variabel untuk digunakan nanti
   const answer = answerInput.value.trim();
+  
   if (answer === '' || isNaN(Number(answer))) {
     answerInput.focus();
     return;
@@ -176,7 +179,7 @@ async function handleSubmit() {
       correct_streak,
       wrong_streak,
       difficulty,
-      correct_answer,
+      correct_answer,  // ⚠️ Ini NULL saat correct=true (anti-cheat backend)
       game_over,
     } = result;
 
@@ -204,15 +207,29 @@ async function handleSubmit() {
     patternDisplay.classList.remove('correct', 'wrong');
     patternDisplay.classList.add(correct ? 'correct' : 'wrong');
 
-    // Update answer box visual
+    // ── ✅ FIX: Update answer box visual (handle null correct_answer) ──
     const answerBox = document.getElementById('answerPlaceholder');
     if (answerBox) {
       answerBox.classList.remove('correct', 'wrong');
       answerBox.classList.add(correct ? 'correct' : 'wrong');
+      
       if (correct) {
-        answerBox.innerHTML = `<span>${correct_answer}</span>`;
+        // ✅ Backend mengirim null saat benar (anti-cheat)
+        // Gunakan jawaban user yang sudah diverifikasi benar
+        // Variabel 'answer' sudah tersedia dari scope function ini
+        answerBox.innerHTML = `<span>${answer}</span>`;
+      } else {
+        // ❌ Saat salah, tampilkan jawaban benar dari backend setelah jeda
+        if (correct_answer !== null && correct_answer !== undefined) {
+          setTimeout(() => {
+            answerBox.innerHTML = `<span>${correct_answer}</span>`;
+            answerBox.classList.add('correct');
+            answerBox.classList.remove('wrong');
+          }, 800);
+        }
       }
     }
+    // ── END FIX ──
 
     if (game_over || lives <= 0) {
       clearInterval(timerInterval);

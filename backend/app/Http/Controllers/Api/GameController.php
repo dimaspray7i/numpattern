@@ -8,6 +8,7 @@ use App\Models\Score;
 use App\Services\PatternService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GameController extends Controller
 {
@@ -63,7 +64,7 @@ class GameController extends Controller
         return response()->json([
             'sequence'     => $sequence,
             'pattern_type' => $type,
-            // answer is intentionally omitted
+            // answer is intentionally omitted (anti-cheat)
         ]);
     }
 
@@ -114,9 +115,17 @@ class GameController extends Controller
             $this->saveScore($user->id, $session->current_score, $session->difficulty);
         }
 
+        // DEBUG LOG (opsional, bisa dihapus di production)
+        Log::info('Submit answer debug', [
+            'user_answer' => $data['answer'],
+            'server_answer' => $correctAnswer,
+            'is_correct' => $correct,
+            'response_correct_answer' => $correct ? null : $correctAnswer
+        ]);
+
         return response()->json([
             'correct'        => $correct,
-            'correct_answer' => $correct ? null : $correctAnswer,
+            'correct_answer' => $correct ? null : $correctAnswer, // Anti-cheat: null jika benar
             'score'          => $session->current_score,
             'lives'          => $session->lives,
             'correct_streak' => $session->correct_streak,
@@ -210,6 +219,10 @@ class GameController extends Controller
     // ─── PRIVATE ─────────────────────────────────
     private function saveScore(int $userId, int $score, string $difficulty): void
     {
+        if ($score <= 0) {
+            return;
+        }
+
         Score::create([
             'user_id'    => $userId,
             'score'      => $score,

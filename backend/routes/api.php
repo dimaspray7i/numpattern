@@ -1,38 +1,47 @@
 <?php
-// routes/api.php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GameController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-| All routes are prefixed with /api automatically by Laravel.
-| Rate limiting: 'api' throttle (60/min) applied globally via kernel.
 */
 
-// ── Public: Auth ──────────────────────────────────────────────────────────
-Route::post('/register', [AuthController::class, 'register'])
-     ->middleware('throttle:10,1'); // max 10 registrations per minute per IP
+// Public routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/login', [AuthController::class, 'login'])
-     ->middleware('throttle:10,1');
-
-// ── Protected: Auth ───────────────────────────────────────────────────────
+// Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
-
+    
+    // User logout
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    // ── Game ──────────────────────────────────────────────────────────────
-    Route::post('/start-session',    [GameController::class, 'startSession']);
+    
+    // Game endpoints
+    Route::post('/start-session', [GameController::class, 'startSession']);
     Route::get('/generate-question', [GameController::class, 'generateQuestion']);
-    Route::post('/submit-answer',    [GameController::class, 'submitAnswer']);
-    Route::post('/end-game',         [GameController::class, 'endGame']);
-    Route::get('/get-score',         [GameController::class, 'getScore']);
+    Route::post('/submit-answer', [GameController::class, 'submitAnswer']);
+    Route::post('/end-game', [GameController::class, 'endGame']);
+    
+    // Score & Stats endpoints
+    Route::get('/get-score', [GameController::class, 'getScore']);
+    Route::get('/leaderboard', [GameController::class, 'leaderboard']);
+    Route::get('/stats', [GameController::class, 'stats']);
+    
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard/data', [DashboardController::class, 'realtimeData']);
+});
 
-    // ── Leaderboard & Stats ───────────────────────────────────────────────
-    Route::get('/leaderboard',       [GameController::class, 'leaderboard']);
-    Route::get('/stats',             [GameController::class, 'stats']);
+// Fallback untuk API
+Route::fallback(function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'API endpoint not found',
+    ], 404);
 });

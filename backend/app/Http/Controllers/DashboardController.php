@@ -72,11 +72,14 @@ class DashboardController extends Controller
 
         // ============================================================
         // RECENT SCORES - Skor terbaru (unique per user)
+        // Exclude zero-score entries so recent scores reflect actual gameplay.
         // ============================================================
         $recentScores = Score::with('user')
-            ->orderBy('created_at', 'desc')
+            ->where('score', '>', 0)
+            ->latest('created_at')
             ->get()
             ->unique('user_id')
+            ->values()
             ->take(10)
             ->map(function ($score) {
                 $score->formatted_time = Carbon::parse($score->created_at)->format('H:i:s d/m/Y');
@@ -129,11 +132,12 @@ class DashboardController extends Controller
 
         // Recent scores
         $recentScores = Score::with('user')
-            ->orderBy('created_at', 'desc')
+            ->where('score', '>', 0)
+            ->latest('created_at')
             ->get()
             ->unique('user_id')
-            ->take(10)
             ->values()
+            ->take(10)
             ->map(function ($score) {
                 return [
                     'player' => $score->user->name,

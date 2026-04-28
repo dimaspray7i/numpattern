@@ -26,7 +26,7 @@
       padding: 28px 20px;
       display: flex; flex-direction: column; gap: 32px;
     }
-    .sidebar-brand { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.04em; }
+    .sidebar-brand { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.04em; }
     .sidebar-brand span { color: var(--accent); }
     .sidebar-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
     .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
@@ -58,7 +58,7 @@
       border: 1px solid var(--accent-green);
       color: var(--accent-green);
       border-radius: 100px;
-      font-size: 0.7rem;
+      font-size: 0.5rem;
       padding: 4px 12px;
       margin-left: 10px;
     }
@@ -69,7 +69,7 @@
       background: #39d98a;
       border-radius: 50%;
       animation: pulse 1.5s infinite;
-      margin-right: 6px;
+      margin-right: 5px;
     }
     @keyframes pulse {
       0% { opacity: 1; transform: scale(1); }
